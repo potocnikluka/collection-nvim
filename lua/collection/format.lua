@@ -15,16 +15,16 @@ function M.format()
 	vim.cmd [[silent! normal mz]]
 	local formater = ''
 	if vim.fn.exists(
-		string.format('g:collection_%s_format', filetype)
+		string.format('g:collection_%s_formater', filetype)
 		) == 0 or vim.g[
-		string.format('collection_%s_format', filetype)
+		string.format('collection_%s_formater', filetype)
 		] == 0 then
 		vim.cmd[[silent! normal gg=Gg'zw]]
 		return print(
 		'No formater specified, using default indenting.'
 		)
 	else
-		formater = vim.g[string.format('collection_%s_format', filetype)]
+		formater = vim.g[string.format('collection_%s_formater', filetype)]
 	end
 	local words = {}
 	local formaterName = formater:gmatch("[^%s]+")()

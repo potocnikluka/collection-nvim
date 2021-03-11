@@ -1,6 +1,6 @@
 local M = {}
 
--- Add arguments from interprete, compile or execute to command
+-- Add arguments from interpreter, compiler or execute to command
 local function addToCommand(command, args)
 	local function manipulateCommand()
 		--split arguments and expand those starting with % (path)
@@ -36,13 +36,13 @@ local function addToCommand(command, args)
 end
 
 -- Build command from info in filetypes
-local function buildCommand(interprete, compile, execute, arguments)
+local function buildCommand(interpreter, compiler, execute, arguments)
 	local command = ''
 	local function tryToBuild()
-		if interprete ~= nil then
-			command = addToCommand(command, interprete)
-		elseif compile ~= nil then
-			command = addToCommand(command, compile)
+		if interpreter ~= nil then
+			command = addToCommand(command, interpreter)
+		elseif compiler ~= nil then
+			command = addToCommand(command, compiler)
 		end
 		for i in string.gmatch(arguments, "[^%s]+") do
 			if string.sub(i, 1, 1) == '-' then
@@ -91,29 +91,29 @@ function M.run(args, progInfo)
 	vim.fn.execute(string.format("silent! bwipeout! %d", progInfo['progBuf']))
 	local filetype = vim.bo.filetype
 	local curWin = vim.fn.winnr()
-	local interprete = nil
-	local compile = nil
+	local interpreter = nil
+	local compiler = nil
 	local execute = nil
 	if vim.fn.exists(
-		string.format('g:collection_%s_interprete', filetype)
+		string.format('g:collection_%s_interpreter', filetype)
 		) == 1 and vim.g[
-		string.format('collection_%s_interprete', filetype)
+		string.format('collection_%s_interpreter', filetype)
 		] ~= 0 then
-		interprete = vim.g[string.format(
-		'collection_%s_interprete', filetype
+		interpreter = vim.g[string.format(
+		'collection_%s_interpreter', filetype
 		)]
-		if checkIfExecutable(interprete) == 0 then
+		if checkIfExecutable(interpreter) == 0 then
 			return
 		end
 	elseif vim.fn.exists(
-		string.format('g:collection_%s_compile', filetype)
+		string.format('g:collection_%s_compiler', filetype)
 		) == 1 and vim.g[
-		string.format('collection_%s_compile', filetype)
+		string.format('collection_%s_compiler', filetype)
 		] ~= 0 then
-		compile = vim.g[string.format(
-		'collection_%s_compile', filetype
+		compiler = vim.g[string.format(
+		'collection_%s_compiler', filetype
 		)]
-		if checkIfExecutable(compile) == 0 then
+		if checkIfExecutable(compiler) == 0 then
 			return
 		end
 	else
@@ -129,7 +129,7 @@ function M.run(args, progInfo)
 			return
 		end
 	end
-	local command = buildCommand(interprete, compile, execute, args)
+	local command = buildCommand(interpreter, compiler, execute, args)
 	if command == '' then
 		return print('Could not run the program.')
 	end

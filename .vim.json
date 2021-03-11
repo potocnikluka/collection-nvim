@@ -1,6 +1,0 @@
-{
-	"lua": {
-		"interprete": "lua %:p",
-		"format": "lua %:p"
-	}
-}

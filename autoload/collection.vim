@@ -17,9 +17,10 @@ function! collection#filetypes_settings() abort
 		if len(jsonData) == 0  | return | endif
 		let jsonData = json_decode(jsonData)
 		for [key, value] in items(jsonData)
-			execute 'let g:collection_'.key.'_compile=0 |
-						\let g:collection_'.key.'_format=0 |
-						\let g:collection_'.key.'_interprete=0'
+			execute 'let g:collection_'.key.'_compileer=0 |
+						\let g:collection_'.key.'_formater=0 |
+						\let g:collection_'.key.'_execute=0 |
+						\let g:collection_'.key.'_interpreter=0'
 			for [k, v] in items(value)
 				execute 'let g:collection_'.key.'_'.k.'="'.v.'"'
 			endfor
