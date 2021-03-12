@@ -13,7 +13,7 @@ Install with your favourite package manager.
 ```
 	Plug 'potocnikluka/collection-nvim'
 ```
-After installing see `:h collection-nvim` for details on configurations, 
+See `:h collection-nvim` for details on configurations, 
 or read [collection-nvim-help](doc/collection-nvim.txt).
 
 ## Features 

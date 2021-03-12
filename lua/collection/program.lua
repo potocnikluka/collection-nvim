@@ -137,7 +137,7 @@ function M.run(args, progInfo)
 	if vim.g['collection_errorlist_type'] == 1 then
 		errorlistType = 'new errorlist | resize'
 	end
-	vim.cmd[[silent! save]]
+	vim.cmd[[silent! w]]
 	vim.fn.execute(string.format("%s %d", errorlistType, errorlistSize))
 	vim.fn.execute(string.format(
 	"call termopen('%s', {'detach': 0})", command

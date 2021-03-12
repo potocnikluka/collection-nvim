@@ -10,7 +10,7 @@ function M.format()
 		return print('Invalid g:collection_format_save value.')
 	end
 	if vim.g['collection_format_save'] == 1 then
-		vim.cmd[[silent! save]]
+		vim.cmd[[silent! w]]
 	end
 	vim.cmd [[silent! normal mz]]
 	local formater = ''
@@ -77,7 +77,7 @@ function M.format()
 	end
 	vim.cmd[[silent! normal g'z]]
 	if vim.g['collection_format_save'] == 1 then
-		vim.cmd[[silent! save]]
+		vim.cmd[[silent! w]]
 	end
 end
 
