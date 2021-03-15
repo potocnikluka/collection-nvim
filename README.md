@@ -38,12 +38,11 @@ let g:collection_c_execute='%:p:r'
 
 "Toggle snippet list with <leader>q
 nnoremap <leader>q :Snippets<CR>
-"Toggle snippet terminal
+"Toggle terminal
 nnoremap <silent><F4> :CTerm<CR>
 tnoremap <silent><F4> <c-\><c-n>:CTerm<CR>
 nnoremap <silent><leader>f :CFormat<CR>
 "Format with <leader>f
-command! R :CollectionRunProg
 "Toggle errorlist with shift-e
 nnoremap <silent><S-e> :Errorlist<CR>
 

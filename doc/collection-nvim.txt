@@ -14,10 +14,11 @@ INTRODUCTION                                         *collection-introduction*
 
 Config-collection-nvim is a collection of configurations aiming to provide
 an IDE-like feel to neovim.
+
 ==============================================================================
 PREREQUISITES                                       *collection-prerequisites*
 
-- Neovim 5.0
+- Neovim 0.5
 
 ==============================================================================
 FEATURES                                                 *collection-features*
@@ -190,7 +191,7 @@ SNIPPETS                                                 *collection-snippets*
 ==============================================================================
 RUNNING PROGRAM                                       *collection-run-program*
 
-	Run the program with `:CRun`. For each filetype you can set an
+	Run the program with `:R`. For each filetype you can set an
 	interpreter, a compiler and an execute. You cannot have both a
 	compiler and an interpreter. If execution is specified, the program
 	will execute it after successful compiling.

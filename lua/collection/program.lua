@@ -127,12 +127,10 @@ function M.run(args)
 	local command = buildCommand(interpreter, compiler, execute, args)
 	if command == '' then
 		print('Could not run the program.')
-		print(interpreter)
-		print(args)
 		return
 	end
 	local errorlistType = 'vertical new errorlist | vertical resize'
-	if vim.g['collection_errorlist_type'] == 1 then
+	if vim.g.collection_errorlist_type == 1 then
 		errorlistType = 'new errorlist | resize'
 	end
 	vim.cmd[[silent! w]]
@@ -140,7 +138,8 @@ function M.run(args)
 	vim.fn.execute(string.format(
 	"call termopen('%s', {'detach': 0})", command
 	))
-	vim.cmd[[set filetype=errorlist | set winfixwidth | normal G]]
+	vim.bo.filetype="errorlist"
+	vim.cmd[[set winfixwidth | normal G]]
 	vim.g.progbuf = vim.fn.bufnr("")
 	vim.g.progwin = vim.fn.win_getid()
 	vim.fn.execute(string.format("%d wincmd p", curWin))
@@ -165,30 +164,32 @@ function M.toggle()
 		vim.g.collection_errorlist_type ~= 1  then
 		return print('Invalid g:collection_errorlist_type value.')
 	end
-	local errorlistSize = tonumber(vim.g['collection_errorlist_size'])
+	local errorlistSize = tonumber(vim.g.collection_errorlist_size)
 	if errorlistSize == nil or errorlistSize < 1 or errorlistSize > 200 then
 		return print('Invalid g:collection_errorlist_size value.')
 	end
 	local curWin = vim.fn.winnr()
 	if vim.fn.win_gotoid(vim.g.progwin) == 1 then
+		vim.bo.bufhidden=""
 		vim.cmd [[hide]]
-		vim.fn.execute(string.format("%d wincmd p", curWin))
+		vim.fn.execute(curWin.." wincmd p")
 	else
 		local function tryReopen()
 			local errorlistType = 'vertical new errorlist | vertical resize'
 			if vim.g.collection_errorlist_type == 1 then
 				errorlistType = 'new errorlist | resize'
 			end
-			vim.fn.execute(string.format("%s %d", errorlistType, errorlistSize))
-			vim.fn.execute(string.format('buffer %d', vim.g['progbuf']))
+			vim.fn.execute(errorlistType.." "..errorlistSize)
+			vim.fn.execute("buffer "..vim.g.progbuf)
 			vim.g.progbuf = vim.fn.bufnr("")
 			vim.g.progwin = vim.fn.win_getid()
 			vim.cmd [[set winfixwidth | normal G]]
 			vim.fn.execute(string.format("%d wincmd p", curWin))
 		end
-		if not pcall(tryReopen) then
-			vim.cmd [[q!]]
-			print('Nothing running.')
+		local x, er = pcall(tryReopen)
+		if not x then
+			vim.cmd[[q!]]
+			print(er)
 		end
 	end
 end

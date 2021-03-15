@@ -84,7 +84,7 @@ local function saveSnippet()
 end
 
 --list all availible snippets
-local function placeSnippets(text)
+local function listSnippets(text)
 	text = vim.split(text, '\n')
 	for _, v in pairs(text) do
 		if validSnip(v) then
@@ -102,8 +102,9 @@ function M.pasteSnippet(snip)
 	local content=snips[snip]
 	local keys = content[5]:gsub(".*Move cursor:%s*", "")
 	vim.fn.execute("read "..vim.g.configPath.."/snippets/"..snip)
-	vim.cmd[[normal 7dd]]
+	vim.cmd[[normal k8dd]]
 	vim.fn.execute("normal "..keys)
+	print("Pasted "..snip)
 end
 
 --do on pressing enter
@@ -162,6 +163,7 @@ local function loadSnippets()
 			"')<CR>")
 		end
 	end
+	print("Snippets have been loaded.")
 end
 
 function M.show(args)
@@ -229,7 +231,7 @@ function M.show(args)
 		vim.cmd[[setlocal cursorline]]
 		local text = vim.fn.globpath(',', vim.g.configPath..'/snippets/*')
 		:gsub(vim.g.configPath.."/snippets/", "")
-		placeSnippets(text)
+		listSnippets(text)
 		vim.cmd[[set readonly]]
 		vim.fn.execute("setlocal scrolloff="..height - 2)
 		vim.cmd[[syntax match Snippets "│\-\ .*\..*"]]

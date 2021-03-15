@@ -28,4 +28,5 @@ end
 function M.pasteSnippet(args)
 	snippets.pasteSnippet(args)
 end
+
 return M

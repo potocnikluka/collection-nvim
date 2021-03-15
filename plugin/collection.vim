@@ -32,7 +32,7 @@ let g:progbuf = 0
 augroup Program
 	call collection#filetypes_settings()
 	command! Errorlist call Collection("togErlist")
-	command! -nargs=* CRun call Collection("runProg", <q-args>)
+	command! -nargs=* R call Collection("runProg", <q-args>)
 augroup END
 "-------------------------------------------------------------------- formating
 augroup Format
@@ -41,7 +41,6 @@ augroup END
 
 augroup Snippets
 	command! -nargs=* Snippets call Collection("snippets", <q-args>)
-	nnoremap <Space>q :Snippets<CR>
 augroup END
 
 function! Collection(type, ...)
