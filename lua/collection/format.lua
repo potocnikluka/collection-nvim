@@ -5,11 +5,11 @@ function M.format()
 	if string.find(vim.g['collection_format_ignore'], filetype) ~= nil then
 		return
 	end
-	if vim.g['collection_format_save'] ~= 1 and
-		vim.g['collection_format_save'] ~= 0 then
+	if vim.g.collection_format_save ~= 1 and
+		vim.g.collection_format_save ~= 0 then
 		return print('Invalid g:collection_format_save value.')
 	end
-	if vim.g['collection_format_save'] == 1 then
+	if vim.g.collection_format_save == 1 then
 		vim.cmd[[silent! w]]
 	end
 	vim.cmd [[silent! normal mz]]
@@ -48,11 +48,9 @@ function M.format()
 		return print('Could not format.')
 	end
 	local function tryFormating()
-		vim.fn.execute(string.format(
-		'setlocal equalprg=%s', command
-		))
+		vim.o.equalprg=command
 		vim.cmd[[silent normal G=gg]]
-		vim.cmd[[setlocal equalprg=""]]
+		vim.o.equalprg=""
 		if string.find(vim.fn.getline('.'), 'error') ~= nil then
 			local err = vim.fn.getline('.')
 			vim.cmd[[silent! undo]]
@@ -63,7 +61,7 @@ function M.format()
 	end
 	if not pcall(tryFormating) then
 		local function tryNormal()
-			vim.cmd[[setlocal equalprg=""]]
+			vim.ob.equalprg=""
 			vim.cmd[[silent normal G=gg]]
 			print(string.format(
 			'Could not format with %s, using default indenting.',
@@ -76,7 +74,7 @@ function M.format()
 		end
 	end
 	vim.cmd[[silent! normal g'z]]
-	if vim.g['collection_format_save'] == 1 then
+	if vim.g.collection_format_save == 1 then
 		vim.cmd[[silent! w]]
 	end
 end

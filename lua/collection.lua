@@ -1,25 +1,31 @@
 local terminal = require'collection.terminal'
 local program = require'collection.program'
 local format = require'collection.format'
+local snippets = require'collection.snippets'
 local M = {}
 
-local termInfo = {}
-termInfo['termWin'] = 0
-termInfo['termBuf'] = 0
-local progInfo = {}
-progInfo['progBuf'] = 0
-progInfo['progWin'] = 0
-
 function M.toggleTerminal()
-	terminal.toggle(termInfo)
+	terminal.toggle()
 end
 function M.toggleErrorlist()
-	program.toggle(progInfo)
+	program.toggle()
 end
 function M.runProgram(args)
-	program.run(args, progInfo)
+	program.run(args)
 end
-function M.format(dontFormat)
-	format.format(dontFormat)
+function M.format()
+	format.format()
+end
+function M.showSnippets(args)
+	snippets.show(args)
+end
+function M.selectSnippet()
+	snippets.selection()
+end
+function M.saveSnippet(args)
+	snippets.saveSnippet(args)
+end
+function M.pasteSnippet(args)
+	snippets.pasteSnippet(args)
 end
 return M

@@ -65,8 +65,8 @@ local function buildCommand(interpreter, compiler, execute, arguments)
 		return command
 	end
 	return ''
-
 end
+
 local function checkIfExecutable(args)
 	if string.sub(args, 1, 1) == '%' then
 		return 1
@@ -79,16 +79,17 @@ local function checkIfExecutable(args)
 		return 1
 	end
 end
-function M.run(args, progInfo)
-	if vim.g['collection_errorlist_type'] ~= 0 and
-		vim.g['collection_errorlist_type'] ~= 1  then
+
+function M.run(args)
+	if vim.g.collection_errorlist_type ~= 0 and
+		vim.g.collection_errorlist_type ~= 1  then
 		return print('Invalid g:collection_errorlist_type value.')
 	end
-	local errorlistSize = tonumber(vim.g['collection_errorlist_size'])
+	local errorlistSize = tonumber(vim.g.collection_errorlist_size)
 	if errorlistSize == nil or errorlistSize < 1 or errorlistSize > 200 then
 		return print('Invalid g:collection_errorlist_size value.')
 	end
-	vim.fn.execute(string.format("silent! bwipeout! %d", progInfo['progBuf']))
+	vim.fn.execute("silent! bwipeout! "..vim.g.progbuf)
 	local filetype = vim.bo.filetype
 	local curWin = vim.fn.winnr()
 	local interpreter = nil
@@ -96,9 +97,7 @@ function M.run(args, progInfo)
 	local execute = nil
 	if vim.fn.exists(
 		string.format('g:collection_%s_interpreter', filetype)
-		) == 1 and vim.g[
-		string.format('collection_%s_interpreter', filetype)
-		] ~= 0 then
+		) == 1 then
 		interpreter = vim.g[string.format(
 		'collection_%s_interpreter', filetype
 		)]
@@ -106,10 +105,8 @@ function M.run(args, progInfo)
 			return
 		end
 	elseif vim.fn.exists(
-		string.format('g:collection_%s_compiler', filetype)
-		) == 1 and vim.g[
-		string.format('collection_%s_compiler', filetype)
-		] ~= 0 then
+		string.format('g:collection_%s_compiler', filetype))
+		== 1 then
 		compiler = vim.g[string.format(
 		'collection_%s_compiler', filetype
 		)]
@@ -121,9 +118,7 @@ function M.run(args, progInfo)
 	end
 	if vim.fn.exists(
 		string.format('g:collection_%s_execute', filetype)
-		) == 1 and vim.g[
-		string.format('collection_%s_execute', filetype)
-		] ~= 0 then
+		) == 1  then
 		execute = vim.g[string.format('collection_%s_execute', filetype)]
 		if checkIfExecutable(execute) == 0 then
 			return
@@ -131,7 +126,10 @@ function M.run(args, progInfo)
 	end
 	local command = buildCommand(interpreter, compiler, execute, args)
 	if command == '' then
-		return print('Could not run the program.')
+		print('Could not run the program.')
+		print(interpreter)
+		print(args)
+		return
 	end
 	local errorlistType = 'vertical new errorlist | vertical resize'
 	if vim.g['collection_errorlist_type'] == 1 then
@@ -143,8 +141,8 @@ function M.run(args, progInfo)
 	"call termopen('%s', {'detach': 0})", command
 	))
 	vim.cmd[[set filetype=errorlist | set winfixwidth | normal G]]
-	progInfo['progBuf'] = vim.fn.bufnr("")
-	progInfo['progWin'] = vim.fn.win_getid()
+	vim.g.progbuf = vim.fn.bufnr("")
+	vim.g.progwin = vim.fn.win_getid()
 	vim.fn.execute(string.format("%d wincmd p", curWin))
 	local txt = ''
 	for i in string.gmatch(command, "[^%s]+") do
@@ -162,9 +160,9 @@ function M.run(args, progInfo)
 end
 
 --Toggle the errorlist
-function M.toggle(progInfo)
-	if vim.g['collection_errorlist_type'] ~= 0 and
-		vim.g['collection_errorlist_type'] ~= 1  then
+function M.toggle()
+	if vim.g.collection_errorlist_type ~= 0 and
+		vim.g.collection_errorlist_type ~= 1  then
 		return print('Invalid g:collection_errorlist_type value.')
 	end
 	local errorlistSize = tonumber(vim.g['collection_errorlist_size'])
@@ -172,19 +170,19 @@ function M.toggle(progInfo)
 		return print('Invalid g:collection_errorlist_size value.')
 	end
 	local curWin = vim.fn.winnr()
-	if vim.fn.win_gotoid(progInfo['progWin']) == 1 then
+	if vim.fn.win_gotoid(vim.g.progwin) == 1 then
 		vim.cmd [[hide]]
 		vim.fn.execute(string.format("%d wincmd p", curWin))
 	else
 		local function tryReopen()
 			local errorlistType = 'vertical new errorlist | vertical resize'
-			if vim.g['collection_errorlist_type'] == 1 then
+			if vim.g.collection_errorlist_type == 1 then
 				errorlistType = 'new errorlist | resize'
 			end
 			vim.fn.execute(string.format("%s %d", errorlistType, errorlistSize))
-			vim.fn.execute(string.format('buffer %d', progInfo['progBuf']))
-			progInfo['progBuf'] = vim.fn.bufnr("")
-			progInfo['progWin'] = vim.fn.win_getid()
+			vim.fn.execute(string.format('buffer %d', vim.g['progbuf']))
+			vim.g.progbuf = vim.fn.bufnr("")
+			vim.g.progwin = vim.fn.win_getid()
 			vim.cmd [[set winfixwidth | normal G]]
 			vim.fn.execute(string.format("%d wincmd p", curWin))
 		end

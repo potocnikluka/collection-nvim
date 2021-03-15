@@ -5,58 +5,32 @@ A collection of configurations for comfortable neovim experience.
 CONTENTS                                                     *collection-nvim*
 
     0. Introduction ............ |collection-introduction|
-    1. Features ................ |collection-features|
-    2. Prerequisites ........... |collection-prerequisite|
+    1. Prerequisites ........... |collection-prerequisite|
+    2. Features ................ |collection-features|
     3. Options ................. |collection-options|
-    4. Configuring filetypes ... |collection-filetypes|
 
 ==============================================================================
 INTRODUCTION                                         *collection-introduction*
 
 Config-collection-nvim is a collection of configurations aiming to provide
 an IDE-like feel to neovim.
-
-==============================================================================
-FEATURES                                                 *collection-features*
-
-- Asynchronous program running.
-- Code formating.
-- Toggling Terminal.
-- Project specific settings with .vim.json.
-
 ==============================================================================
 PREREQUISITES                                       *collection-prerequisites*
 
 - Neovim 5.0
 
 ==============================================================================
+FEATURES                                                 *collection-features*
+
+    0. Snippet managing ................ |collection-snippets|
+    1. Asynchronous program running .... |collection-run-pgoram|
+    2. Filetype specific settings ...... |collection-filetypes|
+    3. .vim.json ....................... |collection-json|
+    4. Code formating .................. |collection-formating|
+    5. Toggling Terminal ............... |collection-terminal|
+
+==============================================================================
 OPTIONS                                                   *collection-options*
-
-g:collection_run_program                            *g:collection_run_program*
-
-	Name of the command to be used for running the program. It should 
-	start with uppercase letter.
-
-	This command allows adding arguments. If filetype has compile and
-	execute options set up, arguments starting with - will be added when
-	compiling, others when executing. Example:
->
-	:R -lm < test.in
-<
-	See |collection-filetypes| for more on setting up compilers, 
-	interpreters... for filetypes.
-
-        default value: "R"
-
-g:collection_toggle_errorlist                  *g:collection_toggle_errorlist*
-
-	This variable sets up the key for toggling the 'errorlist' buffer
-	created when running the program.
-
-	Toggling it off will keep the content and it will not kill the job 
-	if the program hasn't finished running yet.
-
-        default value: "<S-E>"
 
 g:collection_errorlist_type                      *g:collection_errorlist_type*
 
@@ -72,16 +46,6 @@ g:collection_errorlist_size                      *g:collection_errorlist_size*
 
         default value: 50
 
-g:collection_format_file                            *g:collection_format_file*
-
-	This variable sets up the key to be used to format the whole file.
-	Formating uses default indenting if no other options are provided.
-
-	See |collection-filetypes| for more on adding formaters for a specific 
-	filetype.
-
-        default value: "<Space>f"
-
 g:collection_format_ignore                        *g:collection_format_ignore*
 
 	List of comma separated filetypes that won't be formated.
@@ -96,14 +60,6 @@ g:collection_format_save                            *g:collection_format_save*
 	BufWritePre event.
 
         default value: 1
-
-g:collection_toggle_terminal                    *g:collection_toggle_terminal*
-
-	This variable sets up key to be used for toggling the terminal.
-	Toggling the terminal off does not kill the process, so the terminal
-	keeps the same instance.
-
-        default value: "<F4>"
 
 g:collection_terminal_type                        *g:collection_terminal_type*
 
@@ -122,7 +78,7 @@ g:collection_terminal_size                        *g:collection_terminal_size*
 ==============================================================================
 CONFIGURING FILETYPES                                   *collection-filetypes*
 
-This plugin allows setting up compilers, interpreters, executions and 
+Set up compilers, interpreters, executions and 
 formaters for each filetype.
 
 Options can be added either to init.vim or to .vim.json file, which
@@ -213,6 +169,70 @@ Adding .vim.json file                                        *collection-json*
 	}
 <
 	You can add configurations for multiple filetypes in the json.
+
+==============================================================================
+SNIPPETS                                                 *collection-snippets*
+    
+	List all availible snippets with `:Sn(ippets)` and create snippets with
+	`:Sn(ippets) <file-name>` When creating a snippet, filetype, name and
+	key mapping must be given. Move cursor option can be added, which
+	changed the location of the cursor after pasting the snippet.
+	Example `5j2w`
+
+	Snippets can be either pasted directly from the list, or with a
+	remaping of the keys you specified when creating them. To enable
+	the mappings, use command `:Sn(ippets) load` .
+	You can use an autocomand to load them on entering vim.
+>
+	autocmd VimEnter * :Snippets load
+<
+
+==============================================================================
+RUNNING PROGRAM                                       *collection-run-program*
+
+	Run the program with `:CRun`. For each filetype you can set an
+	interpreter, a compiler and an execute. You cannot have both a
+	compiler and an interpreter. If execution is specified, the program
+	will execute it after successful compiling.
+
+	Optional arguments can be added to the command. Arguments tarting with
+	"-" will be used when compiling, others when executing.
+
+	Program output can be toggled with `:Errorlist`, see
+	|collection-options|.
+
+	All compilers and interpreters need to be installed on your computer.
+	See |collection-filetypes| and |collection-json| for more on 
+	configuring filetype-specific and project-specific settings.
+
+==============================================================================
+CODE FORMATING                                          *collection-formating*
+
+	Format the code with `:CFormat`. You can set up different 
+	formaters for different filetypes, but they need to be manually
+	installed on the computer. If formater is not specified or 
+	cannot be executed, default indenting will be used. 
+	See |collection-filetypes-formaters| and |collection-options| 
+	for more on setting up formaters.
+
+	You can map the command to a more conventien key binding. As an
+	example:
+>
+	nnoremap <Space>f :CFormat<CR>
+<
+
+==============================================================================
+TOGGLING TERMINAL                                        *collection-terminal*
+
+	Toggle the terminal with `:CTerminal`. Terminal keeps the same 
+	instance when toggled off, the process is not killed. See
+	|collection-options| for more on configuring the terminal.
+
+	Mapping is recomended:
+>
+	nnoremap <F4> :CTerminal<CR>
+	tnoremap <F4> <C-\><c-n>:CTerminal<CR>
+>
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:

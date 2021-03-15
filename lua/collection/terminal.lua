@@ -1,19 +1,19 @@
 local M = {}
-function M.toggle(termInfo)
-	if vim.g['collection_terminal_type'] ~= 0 and
-		vim.g['collection_terminal_type'] ~= 1  then
+function M.toggle()
+	if vim.g.collection_terminal_type ~= 0 and
+		vim.g.collection_terminal_type ~= 1  then
 		return print('Invalid g:collection_terminal_type value.')
 	end
-	local termSize = tonumber(vim.g['collection_terminal_size'])
+	local termSize = tonumber(vim.g.collection_terminal_size)
 	if termSize == nil or termSize < 1 or termSize > 200 then
 		return print('Invalid g:collection_terminal_size value.')
 	end
-	if vim.fn.win_gotoid(termInfo['termWin']) == 1 then
+	if vim.fn.win_gotoid(vim.g.termwin) == 1 then
 		vim.cmd [[hide]]
 		return
 	end
 	local termType = 'vertical '
-	if vim.g['collection_terminal_type'] == 1 then
+	if vim.g.collection_terminal_type == 1 then
 		termType = ''
 	end
 	vim.fn.execute(string.format(
@@ -21,14 +21,15 @@ function M.toggle(termInfo)
 	))
 
 	local function reopenTerm()
-		vim.fn.execute(string.format("buffer %d", termInfo['termBuf']))
+		vim.fn.execute(string.format("buffer %d", vim.g["termbuf"]))
 	end
 	if not pcall(reopenTerm) then
 		vim.cmd [[call termopen($SHELL, {'detach': 0})]]
 	end
 	vim.cmd [[startinsert]]
-	termInfo['termBuf'] = vim.fn.bufnr("")
-	termInfo['termWin'] = vim.fn.win_getid()
+	vim.g.termbuf = vim.fn.bufnr("")
+	vim.g.termwin = vim.fn.win_getid()
+	print("")
 end
 
 return M
