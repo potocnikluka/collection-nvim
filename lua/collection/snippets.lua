@@ -88,7 +88,7 @@ local function listSnippets(text)
 	text = vim.split(text, '\n')
 	for _, v in pairs(text) do
 		if validSnip(v) then
-			vim.fn.execute("normal o│- "..v..string.rep(
+			vim.fn.execute("normal o│─ "..v..string.rep(
 			" ", vim.g.snipWidth - (4 + string.len(v))).."│"
 			)
 			deleteLine()
@@ -102,17 +102,17 @@ function M.pasteSnippet(snip)
 	local content=snips[snip]
 	local keys = content[5]:gsub(".*Move cursor:%s*", "")
 	vim.fn.execute("read "..vim.g.configPath.."/snippets/"..snip)
-	vim.cmd[[normal k8dd]]
+	vim.cmd[[silent! normal k8dd]]
 	vim.fn.execute("normal "..keys)
 	print("Pasted "..snip)
 end
 
 --do on pressing enter
 function M.selection()
-	local name = vim.fn.getline('.'):gsub("^│%-%s*", ""):gsub("%s*│$", "")
+	local name = vim.fn.getline('.'):gsub("^│─%s*", ""):gsub("%s*│$", "")
 	if name:gsub("^│%s*", "") == "PASTE" then
 		vim.cmd[[normal 5k]]
-		name = vim.fn.getline('.'):gsub("^│%-%s*", ""):gsub("%s*│$", "")
+		name = vim.fn.getline('.'):gsub("^│─%s*", ""):gsub("%s*│$", "")
 		vim.cmd[[q!]]
 		return M.pasteSnippet(name)
 	end
@@ -170,7 +170,7 @@ function M.show(args)
 	if args == 'load' then
 		return loadSnippets()
 	end
-	--toggle on explorer
+	--toggle on snippets
 	vim.g.currentWin = vim.fn.win_getid()
 	--if oppened, close
 	if vim.fn.win_gotoid(vim.g.snipWin) == 1 then
@@ -234,10 +234,10 @@ function M.show(args)
 		listSnippets(text)
 		vim.cmd[[set readonly]]
 		vim.fn.execute("setlocal scrolloff="..height - 2)
-		vim.cmd[[syntax match Snippets "│\-\ .*\..*"]]
+		vim.cmd[[syntax match Snippets "│─.*\ .*\..*"]]
 		vim.cmd[[syntax match Paste "│\s*PASTE"]]
 		vim.cmd[[highlight def link Snippets Function]]
-		vim.cmd[[highlight def link Paste GruvBoxRed]]
+		vim.cmd[[highlight def Paste guifg=#fb4934 ctermfg=167]]
 		vim.fn.execute(
 		"nnoremap <buffer> <silent><CR> "..
 		":lua require'collection'.selectSnippet()<CR>"

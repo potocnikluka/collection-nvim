@@ -4,28 +4,28 @@ local M = {}
 local function addToCommand(command, args)
 	local function manipulateCommand()
 		--split arguments and expand those starting with % (path)
-		for argument in string.gmatch(args, "[^%s]+") do
+		for _,argument in pairs(vim.split(args, " ")) do
 			if string.sub(argument, 1, 1) == '%' then
 
 				--if unexpanded path includes '.', replace extension
-				if string.find(argument, '%.') then
+				if string.find(argument, '%.') ~= nil then
 					local s = ''
 					local x = string.gmatch(argument, "[^%.]+")
 					for i in x do
 						if string.sub(i, 1, 1) == '%' then
 							i = vim.fn.expand(i)
-							s = string.format("%s%s", s, i)
+							s = s..i
 						else
-							s = string.format("%s.%s", s, i)
+							s = s.."."..i
 						end
 					end
-					command = string.format("%s %s", command, s)
+					command = command.." "..s
 				else
 					argument = vim.fn.expand(argument)
-					command = string.format("%s %s", command, argument)
+					command = command.." "..argument
 				end
 			else
-				command = string.format("%s %s", command, argument)
+				command = command.." "..argument
 			end
 		end
 	end
@@ -44,19 +44,19 @@ local function buildCommand(interpreter, compiler, execute, arguments)
 		elseif compiler ~= nil then
 			command = addToCommand(command, compiler)
 		end
-		for i in string.gmatch(arguments, "[^%s]+") do
+		for _,i in pairs(vim.split(arguments, " ")) do
 			if string.sub(i, 1, 1) == '-' then
-				command = string.format("%s %s", command, i)
+				command = command.." "..i
 			end
 		end
 		--if execute is added, run the prog. after compiling
 		if execute ~= nil  then
-			command = string.format("%s  && ", command)
+			command = command.."  && "
 			command = addToCommand(command, execute)
 		end
-		for i in string.gmatch(arguments, "[^%s]+") do
+		for _,i in pairs(vim.split(arguments, " ")) do
 			if string.sub(i, 1, 1) ~= '-' then
-				command = string.format("%s %s", command, i)
+				command = command.." "..i
 			end
 		end
 	end
@@ -66,14 +66,14 @@ local function buildCommand(interpreter, compiler, execute, arguments)
 	end
 	return ''
 end
-
+--Check if compilers, interpreters... are executable
 local function checkIfExecutable(args)
 	if string.sub(args, 1, 1) == '%' then
 		return 1
 	end
 	local nm = args:match("[^%s]+")
 	if vim.fn.executable(nm) == 0 then
-		print(string.format('Cannot execute %s.', nm))
+		print("Cannot execute "..nm)
 		return 0
 	else
 		return 1
@@ -95,21 +95,18 @@ function M.run(args)
 	local interpreter = nil
 	local compiler = nil
 	local execute = nil
+	--check for existing interpreters, compilers, executes
 	if vim.fn.exists(
-		string.format('g:collection_%s_interpreter', filetype)
+		'g:collection_'..filetype..'_interpreter'
 		) == 1 then
-		interpreter = vim.g[string.format(
-		'collection_%s_interpreter', filetype
-		)]
+		interpreter = vim.g['collection_'..filetype..'_interpreter']
 		if checkIfExecutable(interpreter) == 0 then
 			return
 		end
 	elseif vim.fn.exists(
-		string.format('g:collection_%s_compiler', filetype))
-		== 1 then
-		compiler = vim.g[string.format(
-		'collection_%s_compiler', filetype
-		)]
+		'g:collection_'..filetype..'_compiler'
+		) == 1 then
+		compiler = vim.g['collection_'..filetype..'_compiler']
 		if checkIfExecutable(compiler) == 0 then
 			return
 		end
@@ -117,9 +114,9 @@ function M.run(args)
 		return print('This command is not set for this filetype.')
 	end
 	if vim.fn.exists(
-		string.format('g:collection_%s_execute', filetype)
+		'g:collection_'..filetype..'_execute'
 		) == 1  then
-		execute = vim.g[string.format('collection_%s_execute', filetype)]
+		execute = vim.g['collection_'..filetype..'_execute']
 		if checkIfExecutable(execute) == 0 then
 			return
 		end
@@ -134,25 +131,26 @@ function M.run(args)
 		errorlistType = 'new errorlist | resize'
 	end
 	vim.cmd[[silent! w]]
-	vim.fn.execute(string.format("%s %d", errorlistType, errorlistSize))
-	vim.fn.execute(string.format(
-	"call termopen('%s', {'detach': 0})", command
-	))
+	vim.fn.execute(errorlistType.." "..errorlistSize)
+	vim.fn.execute(
+	"call termopen('"..command.."', {'detach': 0})"
+	)
 	vim.bo.filetype="errorlist"
+	vim.cmd[[file errorlist]]
 	vim.cmd[[set winfixwidth | normal G]]
 	vim.g.progbuf = vim.fn.bufnr("")
 	vim.g.progwin = vim.fn.win_getid()
-	vim.fn.execute(string.format("%d wincmd p", curWin))
+	vim.fn.execute(curWin.." wincmd p")
 	local txt = ''
-	for i in string.gmatch(command, "[^%s]+") do
+	for _,i in pairs(vim.split(command, " ")) do
 		if string.len(i) > 20 and string.find(i, "%/") then
 			local last = ''
 			for j in string.gmatch(i, "[^%/]+") do
 				last = j
 			end
-			txt = string.format("%s .../%s", txt, last)
-		else
-			txt = string.format("%s %s", txt, i)
+			txt = txt.." .../"..last
+		elseif i ~= "" then
+			txt = txt.." "..i
 		end
 	end
 	print(txt)
@@ -174,6 +172,8 @@ function M.toggle()
 		vim.cmd [[hide]]
 		vim.fn.execute(curWin.." wincmd p")
 	else
+		--try to open hidden errorlist buffer
+		--catch err if it does not exist
 		local function tryReopen()
 			local errorlistType = 'vertical new errorlist | vertical resize'
 			if vim.g.collection_errorlist_type == 1 then
@@ -183,13 +183,14 @@ function M.toggle()
 			vim.fn.execute("buffer "..vim.g.progbuf)
 			vim.g.progbuf = vim.fn.bufnr("")
 			vim.g.progwin = vim.fn.win_getid()
+			vim.cmd[[file errorlist]]
 			vim.cmd [[set winfixwidth | normal G]]
-			vim.fn.execute(string.format("%d wincmd p", curWin))
+			vim.fn.execute(curWin.." wincmd p")
 		end
-		local x, er = pcall(tryReopen)
+		local x= pcall(tryReopen)
 		if not x then
 			vim.cmd[[q!]]
-			print(er)
+			print("Nothing is running")
 		end
 	end
 end

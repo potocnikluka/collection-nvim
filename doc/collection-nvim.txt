@@ -1,5 +1,5 @@
 *collection-nvim.txt*
-A collection of configurations for comfortable neovim experience.
+A collection of configurations for a comfortable neovim experience.
 
 
 CONTENTS                                                     *collection-nvim*
@@ -9,16 +9,19 @@ CONTENTS                                                     *collection-nvim*
     2. Features ................ |collection-features|
     3. Options ................. |collection-options|
 
+
 ==============================================================================
 INTRODUCTION                                         *collection-introduction*
 
 Config-collection-nvim is a collection of configurations aiming to provide
 an IDE-like feel to neovim.
 
+
 ==============================================================================
 PREREQUISITES                                       *collection-prerequisites*
 
 - Neovim 0.5
+
 
 ==============================================================================
 FEATURES                                                 *collection-features*
@@ -29,6 +32,7 @@ FEATURES                                                 *collection-features*
     3. .vim.json ....................... |collection-json|
     4. Code formating .................. |collection-formating|
     5. Toggling Terminal ............... |collection-terminal|
+
 
 ==============================================================================
 OPTIONS                                                   *collection-options*
@@ -75,6 +79,7 @@ g:collection_terminal_size                        *g:collection_terminal_size*
 	Size can be set between 1 and 200.
 
         default value: 50
+
 
 ==============================================================================
 CONFIGURING FILETYPES                                   *collection-filetypes*
@@ -171,6 +176,7 @@ Adding .vim.json file                                        *collection-json*
 <
 	You can add configurations for multiple filetypes in the json.
 
+
 ==============================================================================
 SNIPPETS                                                 *collection-snippets*
     
@@ -186,7 +192,7 @@ SNIPPETS                                                 *collection-snippets*
 	You can use an autocomand to load them on entering vim.
 >
 	autocmd VimEnter * :Snippets load
-<
+
 
 ==============================================================================
 RUNNING PROGRAM                                       *collection-run-program*
@@ -205,6 +211,7 @@ RUNNING PROGRAM                                       *collection-run-program*
 	All compilers and interpreters need to be installed on your computer.
 	See |collection-filetypes| and |collection-json| for more on 
 	configuring filetype-specific and project-specific settings.
+
 
 ==============================================================================
 CODE FORMATING                                          *collection-formating*

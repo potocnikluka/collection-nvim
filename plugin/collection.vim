@@ -38,7 +38,7 @@ augroup END
 augroup Format
 	command! CFormat call Collection("format")
 augroup END
-
+"--------------------------------------------------------------------- snippets
 augroup Snippets
 	command! -nargs=* Snippets call Collection("snippets", <q-args>)
 augroup END
