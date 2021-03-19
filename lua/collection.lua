@@ -20,17 +20,14 @@ function M.format()
 	format.format()
 end
 --snippets
-function M.showSnippets(args)
-	snippets.show(args)
-end
-function M.selectSnippet()
-	snippets.selection()
-end
-function M.saveSnippet(args)
-	snippets.saveSnippet(args)
+function M.snippets(args)
+	snippets.snippets(args)
 end
 function M.pasteSnippet(args)
 	snippets.pasteSnippet(args)
+end
+function M.snippetSelect()
+	snippets.onSelect()
 end
 
 return M

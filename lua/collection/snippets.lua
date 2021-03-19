@@ -1,252 +1,235 @@
+local util = require 'collection.util'
 local M = {}
-
-local function deleteLine()
-	vim.cmd[[normal mzGk]]
-	if vim.fn.getline('.'):gsub("^│%s*│", "") == "" then
-		vim.cmd[[normal dd]]
-	end
-	vim.cmd[[normal g'z]]
-end
-local function addLine()
-	if vim.fn.line('$') < vim.g.snipHeight then
-		vim.cmd[[normal mzG]]
-		vim.fn.execute(
-		"normal O".."│"..string.rep(
-		" ", vim.g.snipWidth - 2).."│"
-		)
-		vim.cmd[[normal g'z]]
-	end
-end
-local function getFiletype(ft)
-	if ft == 'py' then
-		return 'python'
-	elseif ft == 'js' then
-		return 'javascript'
-	elseif ft == 'ts' then
-		return 'typescript'
-	else
-		return ft
-	end
-end
-
-
 local snips = {}
---Check if it is a valid snippet
-local function validSnip(name)
-	local content = vim.fn.readfile(vim.g.configPath..'/snippets/'..name)
-	if string.find(content[2], "Filetype:") ~= nil and
-		string.find(content[3], "Name:") ~= nil and
-		string.find(content[4], "Key binding:") ~= nil and
-		string.find(content[5], "Move cursor:") ~= nil and
-		string.find(content[7], "Code:") ~= nil then
-		snips[name]= content
+
+local function validSnippet(snip)
+	local function readFile()
+		return vim.fn.readfile(vim.fn.stdpath('config')..'/snippets/'..snip)
+	end
+	local r, content = pcall(readFile)
+	if not r or content[3] == nil then return false end
+	if string.find(content[1], 'Key binding:') ~= nil and
+		(string.find(content[2], 'Code:') ~= nil or
+		string.find(content[3], 'Code:') ~= nil) then
+		snips[snip] = content
 		return true
 	end
-	return false
 end
 
---Create new snippet
-local function newSnippet(args, filetype)
-	local name = args
-	if string.find(args, "%.") then
-		filetype = args:match("%..*$"):gsub("%.", "")
-		filetype = getFiletype(filetype)
-	end
-	vim.fn.execute(
-	"normal o│ Filetype: "..filetype.."\n│ Name: "..name..
-	"\n│ Key binding:\n│ Move cursor:\n│\n╰ Code:\n")
-	vim.bo.filetype=filetype
+local function onPopupCreation()
+	vim.bo.bufhidden="wipe"
+	vim.bo.autoindent=false
+	vim.bo.smartindent=false
+	vim.wo.cursorline=true
+	vim.cmd[[syntax match Info '^► .*']]
+	vim.cmd[[syntax match Info '^▼ .*']]
+	vim.cmd[[syntax match Paste 'PASTE']]
+	vim.cmd[[highlight def link Paste Function]]
+	vim.cmd[[highlight def link Info Constant]]
+	vim.api.nvim_buf_set_keymap(
+	vim.g.snipBuf, "", "<CR>",
+	":lua require'collection'.snippetSelect()<CR>", {silent=true})
 end
 
-local function saveSnippet()
-	if vim.fn.win_getid() ~= vim.g.snipWin then
-		return
-	elseif vim.fn.getline(2):gsub(".*Filetype:%s*", "") == "" then
-		return print("Please provide a filetype.")
-	elseif vim.fn.getline(3):gsub(".*Name:%s*", "") == "" then
-		return print("Please provide a name.")
-	elseif vim.fn.getline(4):gsub(".*Key binding:%s*", "") == "" then
-		return print("Please add key bindings.")
-	elseif vim.fn.isdirectory(vim.g.configPath.."/snippets") == 0 then
-		return print(
-		"Please create "..vim.g.configPath.."/snippets directory."
-		)
-	end
-	local name=vim.fn.getline(3):gsub(".*Name:%s*", "")
-	if vim.fn.filereadable(vim.g.configPath.."/snippets/"..name) == 1 then
-		return print("File "..name.." already exists.")
-	end
-	local content = vim.fn.getline(1, '$')
-	vim.fn.writefile(content, vim.g.configPath.."/snippets/"..name)
-	vim.cmd[[q]]
-	print("Snippet saved")
-	M.show("")
-end
-
---list all availible snippets
-local function listSnippets(text)
-	text = vim.split(text, '\n')
-	for _, v in pairs(text) do
-		if validSnip(v) then
-			vim.fn.execute("normal o│─ "..v..string.rep(
-			" ", vim.g.snipWidth - (4 + string.len(v))).."│"
-			)
-			deleteLine()
+local function showSnippets()
+	util.createPopup('SNIPPETS', 'snippets', onPopupCreation)
+	vim.bo.readonly=false
+	local text = vim.fn.globpath(',', vim.fn.stdpath('config')..'/snippets/*')
+	for _,i in pairs(vim.split(text, '\n')) do
+		i = i:gsub(vim.fn.stdpath('config')..'/snippets/', '')
+		if validSnippet(i) then
+			vim.fn.execute("normal o►  "..i)
 		end
 	end
 	vim.cmd[[normal gg0]]
+	vim.bo.readonly=true
 end
 
---put the code from snippet into the buffer
-function M.pasteSnippet(snip)
-	local content=snips[snip]
-	local keys = content[5]:gsub(".*Move cursor:%s*", "")
-	vim.fn.execute("read "..vim.g.configPath.."/snippets/"..snip)
-	vim.cmd[[silent! normal k8dd]]
-	vim.fn.execute("normal "..keys)
-	print("Pasted "..snip)
-end
-
---do on pressing enter
-function M.selection()
-	local name = vim.fn.getline('.'):gsub("^│─%s*", ""):gsub("%s*│$", "")
-	if name:gsub("^│%s*", "") == "PASTE" then
-		vim.cmd[[normal 5k]]
-		name = vim.fn.getline('.'):gsub("^│─%s*", ""):gsub("%s*│$", "")
-		vim.cmd[[q!]]
-		return M.pasteSnippet(name)
+function M.pasteSnippet(snippet)
+	vim.bo.readonly=false
+	local content = snips[snippet]
+	local move = true
+	local k = 3
+	if content[2] == 'Move cursor:' or content[2] == 'Move cursor: ' then
+		move = false
 	end
-	local content = snips[name]
-	local i = 5
-	local j = 2
-	vim.cmd[[set noreadonly]]
-	local x = vim.fn.getline(vim.fn.line('.') + 1):gsub("%s*│$", "")
-	while x =="│    "..content[j] or x=="│    PASTE"do
-		vim.cmd[[normal jddk]]
-		x = vim.fn.getline(vim.fn.line('.') + 1):gsub("%s*│$", "")
-		addLine()
-		j = j + 1
+	if vim.fn.exists('g:snipBuf') == 1 then
+		vim.fn.execute("silent! bwipeout! "..vim.g.snipBuf)
 	end
-	if j < 3 then
-		while i > 1 do
-			content[i] = content[i]:gsub("│ ", "")
-			vim.fn.execute("normal o│    "..content[i]..string.rep(
-			" ", vim.g.snipWidth - (6 + string.len(content[i]))).."│"
-			)
-			deleteLine()
-			vim.cmd[[normal k]]
-			i = i - 1
-		end
-		vim.fn.execute("normal 4jo│    PASTE"..string.rep(
-		" ", vim.g.snipWidth - 11).."│"
-		)
-		vim.cmd[[normal 5k0]]
-		deleteLine()
+	if vim.fn.exists('g:snipBordBuf') == 1 then
+		vim.fn.execute("silent! bwipeout! "..vim.g.snipBordBuf)
 	end
-	vim.cmd[[set readonly]]
-end
-
---Load snippets so remappings work
-local function loadSnippets()
-	local text = vim.split(vim.fn.globpath(
-	',', vim.g.configPath..'/snippets/*'):gsub(
-	vim.g.configPath..'/snippets/', ""
-	), '\n')
-	for _, v in pairs(text) do
-		if validSnip(v) then
-			local content = snips[v]
-			local keys = content[4]:gsub(".*Key binding:%s*", "")
-			:gsub("%s*│$", "")
-			vim.fn.execute(
-			"nnoremap "..keys..
-			" :lua require'collection'.pasteSnippet('"..v..
-			"')<CR>")
+	if not vim.bo.modifiable then
+		print("Could not paste")
+		return
+	end
+	local pasteContent = {}
+	local i = 1
+	for j,v in pairs(snips[snippet]) do
+		if j > k then
+			pasteContent[i] = v
+			i = i + 1
 		end
 	end
-	print("Snippets have been loaded.")
-end
-
-function M.show(args)
-	if args == 'load' then
-		return loadSnippets()
-	end
-	--toggle on snippets
-	vim.g.currentWin = vim.fn.win_getid()
-	--if oppened, close
-	if vim.fn.win_gotoid(vim.g.snipWin) == 1 then
-		if args ~= 'save' then
-			return vim.cmd[[q!]]
-		else
-			local r,e = pcall(saveSnippet)
-			if not r then
-				print(e)
-			end
+	vim.fn.nvim_put(pasteContent, 'c', true, false)
+	if move then
+		local x = 'Move cursor:'
+		if string.find(snips[snippet][2], 'Move cursor: ') ~= nil then
+			x = 'Move cursor: '
+		end
+		local m = vim.split(snips[snippet][2], x)
+		if m[2] == nil then
 			return
 		end
-	elseif args == 'save' then
-		return print('No snippet is being managed.')
-	end
-	local filetype = vim.bo.filetype
-	--create popup
-	local swidth = vim.fn.nvim_win_get_width(0)
-	local sheight = vim.fn.nvim_win_get_height(0)
-	local width = swidth
-	local height = sheight
-	if width > 90 then
-		width = 90
-	end
-	if height > 60 then
-		height = 60
-	end
-	local rows = (sheight + 4 - height) / 2
-	local cols = (swidth + 4 - width) / 2
-	vim.g.snipWidth = width - 8
-	vim.g.snipHeight = height - 4
-	vim.g.snipBuf = vim.api.nvim_create_buf(false, true)
-	vim.g.snipWin = vim.api.nvim_open_win(vim.g.snipBuf, true, {
-		relative="editor",
-		width = vim.g.snipWidth,
-		height = vim.g.snipHeight,
-		col = cols,
-		row = rows,
-		style='minimal'
-	})
-	local half1 = (vim.g.snipWidth - 12) / 2
-	local half2 = vim.g.snipWidth - 12 - half1
-	if vim.g.snipWidth % 2 ~= 0 then
-		half1 = half1 - 0.5
-		half2 = half2 + 1
-	end
-	local topBorder = "╭"..string.rep("─", half1)..
-	" SNIPPETS "..string.rep("─", half2).."╮"
-	if args == '' then
-		local bottomBorder = "╰"..string.rep("─", half1)..
-		" SNIPPETS "..string.rep("─", half2).."╯"
-		local midBorder = string.rep("│"..string.rep(
-		" ", half1 + half2 + 10).."│\n", vim.g.snipHeight - 2
-		)
-		vim.fn.execute("normal i"..topBorder.."\n"..midBorder..bottomBorder)
-		vim.cmd[[normal gg0j]]
-		vim.bo.filetype="snippets"
-		vim.cmd[[setlocal cursorline]]
-		local text = vim.fn.globpath(',', vim.g.configPath..'/snippets/*')
-		:gsub(vim.g.configPath.."/snippets/", "")
-		listSnippets(text)
-		vim.cmd[[set readonly]]
-		vim.fn.execute("setlocal scrolloff="..height - 2)
-		vim.cmd[[syntax match Snippets "│─.*\ .*\..*"]]
-		vim.cmd[[syntax match Paste "│\s*PASTE"]]
-		vim.cmd[[highlight def link Snippets Function]]
-		vim.cmd[[highlight def Paste guifg=#fb4934 ctermfg=167]]
-		vim.fn.execute(
-		"nnoremap <buffer> <silent><CR> "..
-		":lua require'collection'.selectSnippet()<CR>"
-		)
-	else
-		vim.fn.execute("normal i"..topBorder.."\n")
-		vim.cmd[[normal gg0]]
-		newSnippet(args, filetype)
+		vim.fn.execute("normal "..m[2])
 	end
 end
 
+local function loadSnippets()
+	local text = vim.fn.globpath(',', vim.fn.stdpath('config')..'/snippets/*')
+	for _,i in pairs(vim.split(text, '\n')) do
+		i = i:gsub(vim.fn.stdpath('config')..'/snippets/', '')
+		if validSnippet(i) then
+			local x = snips[i][1]
+			if string.find(x, "Key binding: ") ~= nil then
+				x = vim.split(x, "Key binding: ")[2]
+			else
+				x = vim.split(x, "Key binding:")[2]
+			end
+			local cmd = "nnoremap "..x.." :lua require'collection'.pasteSnippet('"..i.."')<CR>"
+			vim.fn.execute("silent! "..cmd)
+		end
+	end
+end
+
+local function addSnippet(name)
+	local ft = vim.bo.filetype
+	util.createPopup('ADD SNIPPETS', 'snippets', onPopupCreation)
+	vim.bo.readonly=false
+	vim.bo.bufhidden="wipe"
+	if string.find(name, '%.') ~= nil then
+		local function tryAddFiletype()
+			vim.bo.filetype=util.getFiletype(vim.split(name, '%.')[2])
+		end
+		if not pcall(tryAddFiletype) then
+			vim.bo.filetype=ft
+		end
+	else
+		vim.bo.filetype=ft
+	end
+	local text = {'Name: '..name, 'Key binding:', 'Move cursor:', 'Code:', ''}
+	vim.fn.nvim_put(text, 'l', true, true)
+end
+
+local function saveSnippet(args)
+	if vim.fn.exists("g:snipBuf") == 0 or
+		vim.fn.bufnr("") ~= vim.g.snipBuf then return end
+	if vim.fn.isdirectory(vim.fn.stdpath('config')..'/snippets') == 0 then
+		print('Please create '..vim.fn.stdpath('config')..'/snippets dir.')
+		return
+	elseif vim.fn.getline(2) == 'Name:' or vim.fn.getline(2) == 'Name: ' then
+		print("Please provide a file name!")
+		return
+	elseif vim.fn.getline(3) == 'Key binding:' or
+		vim.fn.getline(3) == 'key binding: ' then
+		print("Please provide a key binding!")
+		return
+	elseif vim.fn.line('$') < 5 or
+		vim.fn.line('$') < 6 and vim.fn.line(5) == '' then
+		print("Cannot save an empty snippet!")
+		return
+	end
+	local name = vim.split(vim.fn.getline(2), 'Name: ')[2]
+	if not string.find(vim.fn.getline(2), 'Name: ') then
+		name = vim.split(vim.fn.getline(2), 'Name:')[2]
+	end
+	if vim.fn.filereadable(vim.fn.stdpath('config')..'/snippets/'..name) and
+		args == 'save' then
+		print('File already exists, add ! to override!')
+		return
+	end
+
+	vim.bo.readonly=false
+	vim.cmd[[normal gg2dd]]
+	vim.fn.execute("wq! "..vim.fn.stdpath('config')..'/snippets/'..name)
+end
+
+function M.onSelect()
+	vim.bo.readonly=false
+	local function trySelect()
+		local snippet = vim.fn.getline('.')
+		local x = vim.split(snippet, ' ')
+		if x[3] ~= nil and x[1] == '▼' then
+			vim.cmd[[s/▼/►/I]]
+			vim.cmd[[silent! normal mzj3ddg'z0]]
+		elseif x[3] ~= nil and x[1] == '►' then
+			vim.cmd[[s/►/▼/I]]
+			snippet = x[3]
+			if snips[snippet] ~= nil and not validSnippet(snippet) then
+				vim.bo.readonly=true
+				return true
+			end
+			local content = snips[snippet]
+			vim.fn.execute("normal o    "..content[1])
+			if not string.find(content[2], 'Move after:') then
+				vim.fn.execute("normal o    Move after:")
+			else
+				vim.fn.execute("normal o    "..content[2])
+			end
+			vim.cmd[[normal o    PASTE]]
+			vim.cmd[[silent normal 3k0]]
+		elseif snippet == '    PASTE' then
+			snippet = vim.split(vim.fn.getline(vim.fn.line('.') - 3), ' ')[3]
+			M.pasteSnippet(snippet)
+			return true
+		else
+			vim.bo.readonly=true
+			return true
+		end
+		return true
+	end
+	local r, er = trySelect()
+	if not r then
+		print(er)
+		vim.bo.readonly=true
+		return
+	end
+	if vim.bo.filetype == 'snippets' then
+		vim.bo.readonly=true
+	end
+end
+
+function M.snippets(args)
+	local wipe = false
+	if vim.fn.exists(vim.g.snipWin) == 1 and
+		vim.fn.win_gotoid(vim.g.snipWin) == 1 then
+		if args ~= 'save' and args ~= 'save!' and args ~= 'load' then
+			vim.fn.execute("silent! bwipeout "..vim.g.snipBuf.."")
+			vim.fn.execute("silent! bwipeout "..vim.g.snipBordBuf.."")
+			wipe = true
+		end
+	end
+	if args == '' then
+		if wipe then return end
+		local r, er = pcall(showSnippets)
+		if not r then
+			print(er)
+		end
+	elseif args == 'load' then
+		local r, er = pcall(loadSnippets)
+		if not r then
+			print(er)
+		end
+	elseif args == 'save' or args == 'save!' then
+		local r, er = pcall(saveSnippet, args)
+		if not r then
+			print(er)
+		end
+	else
+		local r, er = pcall(addSnippet, args)
+		if not r then
+			print(er)
+		end
+	end
+end
 return M

@@ -23,24 +23,24 @@ let g:configPath = stdpath('config')
 "-------------------------------------------------------------------- terminal
 let g:termwin = 0
 let g:termbuf = 0
-augroup Terminal
-	command! CTerminal call Collection("togTerm")
-augroup END
+command! CTerminal call Collection("togTerm")
 "------------------------------------------------------------- running program
 let g:progwin = 0
 let g:progbuf = 0
-augroup Program
-	call collection#filetypes_settings()
-	command! Errorlist call Collection("togErlist")
-	command! -nargs=* R call Collection("runProg", <q-args>)
-augroup END
+call collection#filetypes_settings()
+command! Errorlist call Collection("togErlist")
+command! -nargs=* R call Collection("runProg", <q-args>)
 "-------------------------------------------------------------------- formating
-augroup Format
-	command! CFormat call Collection("format")
-augroup END
+command! CFormat call Collection("format")
 "--------------------------------------------------------------------- snippets
+let g:snipInfo = {'buf': 0, 'win': 0, 'border_buf': 0, 'border_win': 0}
+command! -nargs=* Snippets call Collection("snippets", <q-args>)
 augroup Snippets
-	command! -nargs=* Snippets call Collection("snippets", <q-args>)
+	autocmd BufEnter * if exists('g:snipWin') && exists('g:snipBordBuf') &&
+				\ bufnr("") == g:snipBordBuf |
+				\ if !win_gotoid(g:snipWin) |
+				\ silent! execute("bwipeout! " . g:snipBordBuf) |
+				\ else | wincmd p | wincmd w | endif | endif
 augroup END
 
 function! Collection(type, ...)
@@ -62,7 +62,7 @@ function! Collection(type, ...)
 	elseif a:type == 'format'
 		lua require'collection'.format()
 	elseif a:type == 'snippets'
-		lua require'collection'.showSnippets(vim.t.arg)
+		lua require'collection'.snippets(vim.t.arg)
 	endif
 endfunction
 let g:loaded_collection = 1
