@@ -30,7 +30,7 @@ FEATURES                                                 *collection-features*
     1. Asynchronous program running .... |collection-run-pgoram|
     2. Filetype specific settings ...... |collection-filetypes|
     3. .vim.json ....................... |collection-json|
-    4. Code formating .................. |collection-formating|
+    4. Code formatting ................. |collection-formatting|
     5. Toggling Terminal ............... |collection-terminal|
 
 
@@ -60,7 +60,7 @@ g:collection_format_ignore                        *g:collection_format_ignore*
 g:collection_format_save                            *g:collection_format_save*
 
 	Changing value of this option to 0 will disable saving the file when
-	formating. 
+	formatting. 
 	To automatically format on save, you can add your format key to a
 	BufWritePre event.
 
@@ -146,7 +146,7 @@ allows different configurations for different projects. See |collection-json|
 
 3. Formater                                    *collection-filetypes-formater*
 
-	Formater to be used for the filetype when formating the file. If
+	Formater to be used for the filetype when formatting the file. If
 	no option is provided, default indenting will be used.
 
 	Examples:
@@ -214,7 +214,7 @@ RUNNING PROGRAM                                       *collection-run-program*
 
 
 ==============================================================================
-CODE FORMATING                                          *collection-formating*
+CODE FORMATING                                         *collection-formatting*
 
 	Format the code with `:CFormat`. You can set up different 
 	formaters for different filetypes, but they need to be manually
