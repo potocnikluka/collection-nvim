@@ -1,11 +1,11 @@
+.vim.json	collection-nvim.txt	/*.vim.json*
 collection-features	collection-nvim.txt	/*collection-features*
 collection-filetypes	collection-nvim.txt	/*collection-filetypes*
 collection-filetypes-compiler	collection-nvim.txt	/*collection-filetypes-compiler*
 collection-filetypes-execute	collection-nvim.txt	/*collection-filetypes-execute*
 collection-filetypes-formater	collection-nvim.txt	/*collection-filetypes-formater*
 collection-filetypes-interpreter	collection-nvim.txt	/*collection-filetypes-interpreter*
-collection-formating	collection-nvim.txt	/*collection-formating*
-collection-introduction	collection-nvim.txt	/*collection-introduction*
+collection-formatting	collection-nvim.txt	/*collection-formatting*
 collection-json	collection-nvim.txt	/*collection-json*
 collection-nvim	collection-nvim.txt	/*collection-nvim*
 collection-nvim.txt	collection-nvim.txt	/*collection-nvim.txt*

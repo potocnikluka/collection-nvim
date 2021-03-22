@@ -1,6 +1,7 @@
 # Collection-nvim
 
-A collection of configurations for a comfortable neovim experience.
+A collection of configurations to implement some of neovim's 
+useful features.
 
 ## Prerequisites
 * neovim v0.5
@@ -27,25 +28,29 @@ which allows different configurations for different projects.
 
 ## example init.vim config
 
-
 ```
 let g:collection_python_interpreter='python3 %:p'
 let g:collection_python_formater='autopep8 %'
 
 let g:collection_c_compiler='gcc %:p -o %:p:r -std=c99 -Wall -pedantic'
 let g:collection_c_execute='%:p:r'
+"etc..."
 
-
-"Toggle snippet list with <leader>q
+"command for managing snippets
+command! -nargs=* Snippets lua require('collection').snippets(<q-args>)
+"toggle snippets list with <leader> q
 nnoremap <leader>q :Snippets<CR>
+
 "Toggle terminal
-nnoremap <silent><F4> :CTerm<CR>
-tnoremap <silent><F4> <c-\><c-n>:CTerm<CR>
-nnoremap <silent><leader>f :CFormat<CR>
+nnoremap <silent><F4> :lua require('collection').toggleTerminal()<CR>
+tnoremap <silent><F4> <c-\><c-n>:lua require('collection').toggleTerminal()<CR>
+
 "Format with <leader>f
+nnoremap <leader>f :lua require('collection').format()<CR>
+
 "Toggle errorlist with shift-e
-nnoremap <silent><S-e> :Errorlist<CR>
+nnoremap <S-e> :lua require('collection').toggleErrorlist()<CR>
 
 "Auto load snippets on enter
-"autocmd VimEnter * :Snippets load
+"autocmd VimEnter * lua require('collection').snippets('load')
 ```

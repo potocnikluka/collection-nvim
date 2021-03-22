@@ -1,20 +1,13 @@
 *collection-nvim.txt*
-A collection of configurations for a comfortable neovim experience.
+A collection of configurations to implement some of neovim's built in
+features.
 
 
 CONTENTS                                                     *collection-nvim*
 
-    0. Introduction ............ |collection-introduction|
-    1. Prerequisites ........... |collection-prerequisite|
-    2. Features ................ |collection-features|
-    3. Options ................. |collection-options|
-
-
-==============================================================================
-INTRODUCTION                                         *collection-introduction*
-
-Config-collection-nvim is a collection of configurations aiming to provide
-an IDE-like feel to neovim.
+    0. Prerequisites ........... |collection-prerequisites|
+    1. Features ................ |collection-features|
+    2. Options ................. |collection-options|
 
 
 ==============================================================================
@@ -27,7 +20,7 @@ PREREQUISITES                                       *collection-prerequisites*
 FEATURES                                                 *collection-features*
 
     0. Snippet managing ................ |collection-snippets|
-    1. Asynchronous program running .... |collection-run-pgoram|
+    1. Asynchronous program running .... |collection-run-program|
     2. Filetype specific settings ...... |collection-filetypes|
     3. .vim.json ....................... |collection-json|
     4. Code formatting ................. |collection-formatting|
@@ -83,67 +76,53 @@ g:collection_terminal_size                        *g:collection_terminal_size*
 
 ==============================================================================
 CONFIGURING FILETYPES                                   *collection-filetypes*
+                                                                   *.vim.json*
 
-Set up compilers, interpreters, executions and 
-formaters for each filetype.
+Set up compilers, interpreters, executions and formaters for each filetype.
+See |collection-json|.
 
-Options can be added either to init.vim or to .vim.json file, which
-allows different configurations for different projects. See |collection-json|
+Options for compiler and interpreter should start with interpreter or compiler
+name and then path and additional option. 
+
+Paths should be given unexpanded ( see expand ). You can change the
+extension of the path with {unexpanded-path}.{extension}. 
+For example if you want to compile the program into a file with a 
+different extension and then run that file.
+
+Example: 
+    Expanding `%:p` may result to `/path/file.ts`.
+    You can then remove extension with `:r` and add a new one with `.js`.
+    Therefore `%:p:r.js` will result to `/path/file.js`.
+
 
 1. Interpreter                              *collection-filetypes-interpreter*
 
-	Examples:
+	To add an interpreter you can add code following the examples to 
+	your init.vim:
 >
 	let g:collection_python_interpreter="python3 %:p"
 	let g:collection_javascript_interpreter="node %:p"
 <
-	The value of the interpreter option should start with the name of
-	the interpreter and continue with paths and additional settings.
-	Paths should be provided unexpanded. See |expand| . 
-
-	Adding '.extension' to the unexpanded path will add the extension 
-	after expanding:
->
-	pathtofile/file.ts --> %:p:r.js --> pathrofile/file.js
->
+	If interpreter is set, the program will ignore the compiler and	
+	execute option.
 
 2. Compiler                                    *collection-filetypes-compiler*
 
-	Examples:
+	To add a compiler, you can follow these examples:
 >
 	let g:collection_java_compiler="javac %:p"
 	let g:collection_c_compiler="gcc %:p -o %:p:r -Wall"
 	let g:collection_cs_compiler="csc %:p"
 <
-	The value of the compiler option should start with the name of
-	the compiler and continue with paths and additional settings.
-	Paths should be provided unexpanded. See |expand| .
-
-	Adding '.extension' to the unexpanded path will add the extension 
-	after expanding:
->
-	pathtofile/file.ts --> %:p:r.js --> pathrofile/file.js
-
 3. Execute                                     *collection-filetypes-execute*
 
-	This setting should be used for filetypes that need compiling. 
-	Program will be executed only if the compiling has been successful.
-
+	Execute options will be run immediately after successful compiling.
 	Examples:
 >
 	let g:collection_java_execute="java %:p"
 	let g:collection_c_execute="%:p:r"
 	let g:collection_cs_execute="mono %:p:r.exe"
 <
-	The value of the compile option should start with the name of
-	the compiler and continue with paths and additional settings.
-	Paths should be provided unexpanded. See |expand| .
-
-	Adding '.extension' to the unexpanded path will add the extension 
-	after expanding:
->
-	pathtofile/file.ts --> %:p:r.js --> pathrofile/file.js
-
 3. Formater                                    *collection-filetypes-formater*
 
 	Formater to be used for the filetype when formatting the file. If
@@ -158,12 +137,13 @@ allows different configurations for different projects. See |collection-json|
 	the formater and continue with paths and additional settings.
 	Normally adding '%' as a path will suffice.
 
-Adding .vim.json file                                        *collection-json*
+==============================================================================
+ADDING A JSON FILE                                           *collection-json*
 	
-	Filetype configurations can be added to .vim.json file in the root
-	of the project.
-
-	Configurations in json file override default settings in init.vim.
+	If you want to use different comping or formating in a project, you
+	can add a |.vim.json| file. Adding a filetype to this file will
+	override all the default compiler, interpreter and execute options
+	for the filetype in |init.vim|.
 
 	Example .vim.json:
 >
@@ -180,66 +160,97 @@ Adding .vim.json file                                        *collection-json*
 ==============================================================================
 SNIPPETS                                                 *collection-snippets*
     
-	List all availible snippets with `:Sn(ippets)` and create snippets with
-	`:Sn(ippets) <file-name>` When creating a snippet, filetype, name and
-	key mapping must be given. Move cursor option can be added, which
-	changed the location of the cursor after pasting the snippet.
-	Example `5j2w`
+	List all availible snippets:
+	`:lua require('collection').snippets('')`
 
+	Create a new snippet:
+	`:lua require('collection').snippets({snippet-name})`
+
+	When creating a snippet, you need to provide a name and key binding.
+	Optionally you can add where to move the cursor after pasting the
+	snippet.
+	Example snippet creation:
+>
+	Name: mainClass.java
+	Key mapping: <leader>jm
+	Move cursor: 2w
+	Code:
+	public class x {
+	    public static void main(String[] args)
+	}
+<
 	Snippets can be either pasted directly from the list, or with a
 	remaping of the keys you specified when creating them. To enable
-	the mappings, use command `:Sn(ippets) load` .
+	the mappings, use:
+	`:lua require('collection').snippets('load')` .
 	You can use an autocomand to load them on entering vim.
 >
-	autocmd VimEnter * :Snippets load
+	autocmd VimEnter * lua require('collection').snippets('load')
+<
+	Recommended remappings:	
 
+	`command! -nargs=* Sn lua require('collection').snippets(<q-args>)`
 
 ==============================================================================
 RUNNING PROGRAM                                       *collection-run-program*
 
-	Run the program with `:R`. For each filetype you can set an
-	interpreter, a compiler and an execute. You cannot have both a
-	compiler and an interpreter. If execution is specified, the program
-	will execute it after successful compiling.
+	Run the program with:
+	`:lua require('collection').runProgram({arguments})`
+
+	For each filetype you can set an interpreter, a compiler and an
+	execute. You cannot have both a compiler and an interpreter.
+	If execution is specified, the program will execute it after 
+	successful compiling.
 
 	Optional arguments can be added to the command. Arguments tarting with
-	"-" will be used when compiling, others when executing.
+	'-' will be used when compiling, others when executing.
 
-	Program output can be toggled with `:Errorlist`, see
-	|collection-options|.
+	Program output can be toggled with:
+	`:lua require('collection').toggleErrorlist()`
+	See |collection-options|.
 
 	All compilers and interpreters need to be installed on your computer.
 	See |collection-filetypes| and |collection-json| for more on 
 	configuring filetype-specific and project-specific settings.
 
+	Recommended remappings:
+
+	`command! -nargs=* R lua require('collection').runProgram(<q-args>)`
+	`map <C-e> <cmd>lua require('collection').toggleErrorlist()<CR>`
 
 ==============================================================================
 CODE FORMATING                                         *collection-formatting*
 
-	Format the code with `:CFormat`. You can set up different 
-	formaters for different filetypes, but they need to be manually
-	installed on the computer. If formater is not specified or 
-	cannot be executed, default indenting will be used. 
+	Format the code with:
+	`:lua require('collection').format()`
+
+	You can set up different formaters for different filetypes, but they
+	need to be manually installed on the computer. If formater is not
+	specified or cannot be executed, default indenting will be used.
+
 	See |collection-filetypes-formaters| and |collection-options| 
 	for more on setting up formaters.
 
 	You can map the command to a more conventien key binding. As an
 	example:
 >
-	nnoremap <Space>f :CFormat<CR>
+	nnoremap <leader>f :lua require('collection').format()<CR>
 <
 
 ==============================================================================
 TOGGLING TERMINAL                                        *collection-terminal*
 
-	Toggle the terminal with `:CTerminal`. Terminal keeps the same 
+	Toggle the terminal with:
+	`:lua require('collection').toggleTerminal()`
+
+	Terminal keeps the same 
 	instance when toggled off, the process is not killed. See
 	|collection-options| for more on configuring the terminal.
 
 	Mapping is recomended:
 >
-	nnoremap <F4> :CTerminal<CR>
-	tnoremap <F4> <C-\><c-n>:CTerminal<CR>
+	nnoremap <F4> :lua require('collection').toggleTerminal<CR>
+	tnoremap <F4> <C-\><c-n>:lua require('collection').toggleTerminal<CR>
 >
 
 ==============================================================================
