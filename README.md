@@ -23,7 +23,7 @@ or read [collection-nvim-help](doc/collection-nvim.txt).
 * Asynchronous program running.
 * Code formatting.
 * Setting up filetype-specific interpreters, compilers, formaters,...
-* Adding options to `.vim.json`, 
+* Adding options to `.config.vim`, 
 which allows different configurations for different projects.
 
 ## example init.vim config

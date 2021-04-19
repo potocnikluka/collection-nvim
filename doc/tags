@@ -1,4 +1,5 @@
-.vim.json	collection-nvim.txt	/*.vim.json*
+.config.vim	collection-nvim.txt	/*.config.vim*
+collection-config-file	collection-nvim.txt	/*collection-config-file*
 collection-features	collection-nvim.txt	/*collection-features*
 collection-filetypes	collection-nvim.txt	/*collection-filetypes*
 collection-filetypes-compiler	collection-nvim.txt	/*collection-filetypes-compiler*
@@ -6,7 +7,6 @@ collection-filetypes-execute	collection-nvim.txt	/*collection-filetypes-execute*
 collection-filetypes-formater	collection-nvim.txt	/*collection-filetypes-formater*
 collection-filetypes-interpreter	collection-nvim.txt	/*collection-filetypes-interpreter*
 collection-formatting	collection-nvim.txt	/*collection-formatting*
-collection-json	collection-nvim.txt	/*collection-json*
 collection-nvim	collection-nvim.txt	/*collection-nvim*
 collection-nvim.txt	collection-nvim.txt	/*collection-nvim.txt*
 collection-options	collection-nvim.txt	/*collection-options*
@@ -14,6 +14,8 @@ collection-prerequisites	collection-nvim.txt	/*collection-prerequisites*
 collection-run-program	collection-nvim.txt	/*collection-run-program*
 collection-snippets	collection-nvim.txt	/*collection-snippets*
 collection-terminal	collection-nvim.txt	/*collection-terminal*
+g:collection_additional_config	collection-nvim.txt	/*g:collection_additional_config*
+g:collection_config_file	collection-nvim.txt	/*g:collection_config_file*
 g:collection_errorlist_size	collection-nvim.txt	/*g:collection_errorlist_size*
 g:collection_errorlist_type	collection-nvim.txt	/*g:collection_errorlist_type*
 g:collection_format_ignore	collection-nvim.txt	/*g:collection_format_ignore*

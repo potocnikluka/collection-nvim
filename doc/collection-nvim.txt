@@ -22,7 +22,7 @@ FEATURES                                                 *collection-features*
     0. Snippet managing ................ |collection-snippets|
     1. Asynchronous program running .... |collection-run-program|
     2. Filetype specific settings ...... |collection-filetypes|
-    3. .vim.json ....................... |collection-json|
+    3. .config.vim ....................... |collection-config-file|
     4. Code formatting ................. |collection-formatting|
     5. Toggling Terminal ............... |collection-terminal|
 
@@ -73,13 +73,25 @@ g:collection_terminal_size                        *g:collection_terminal_size*
 
         default value: 50
 
+g:collection_additional_config                *g:collection_additional_config*
+
+	Enable or disable additional project specific config with
+	|.config.vim|.
+
+	default value: 1
+
+g:collection_config_file                            *g:collection_config_file*
+
+	Name of the additional config file.
+
+	default value: '.config.vim'
 
 ==============================================================================
 CONFIGURING FILETYPES                                   *collection-filetypes*
-                                                                   *.vim.json*
+                                                                 *.config.vim*
 
 Set up compilers, interpreters, executions and formaters for each filetype.
-See |collection-json|.
+See |collection-config-file|.
 
 Options for compiler and interpreter should start with interpreter or compiler
 name and then path and additional option. 
@@ -138,23 +150,16 @@ Example:
 	Normally adding '%' as a path will suffice.
 
 ==============================================================================
-ADDING A JSON FILE                                           *collection-json*
+ADDING A JSON FILE                                    *collection-config-file*
 	
 	If you want to use different comping or formating in a project, you
-	can add a |.vim.json| file. Adding a filetype to this file will
-	override all the default compiler, interpreter and execute options
-	for the filetype in |init.vim|.
+	can add a |.config.vim| file. 
 
-	Example .vim.json:
+	Example .config.vim:
 >
-	{
-	    "typescript": {
-		"compiler": "tsc --project tsconfig.json",
-		"formater": "prettier %"
-	    }
-	}
-<
-	You can add configurations for multiple filetypes in the json.
+	let g:collection_typescript_compiler = "tsc --project tsconfig.json"
+	let g:collection_typescript_formater = "prettier %"
+	unlet g:collection_typescript_execute
 
 
 ==============================================================================
@@ -210,7 +215,7 @@ RUNNING PROGRAM                                       *collection-run-program*
 	See |collection-options|.
 
 	All compilers and interpreters need to be installed on your computer.
-	See |collection-filetypes| and |collection-json| for more on 
+	See |collection-filetypes| and |collection-config-file| for more on 
 	configuring filetype-specific and project-specific settings.
 
 	Recommended remappings:

@@ -9,23 +9,11 @@ function! FindFile(lookFor)
 	return ''
 endfunction
 
-function! collection#filetypes_settings() abort
-	let jsonFile = FindFile('.vim.json')
-	if jsonFile == '' | return | endif
+function! collection#filetypes_settings(file) abort
 	try
-		let jsonData = readfile(expand(jsonFile))
-		if len(jsonData) == 0  | return | endif
-		let jsonData = json_decode(jsonData)
-		for [key, value] in items(jsonData)
-			for i in ['compiler', 'formater', 'interpreter', 'execute']
-				if exists('g:collection_'.key.'_'.i.'')
-					execute 'unlet g:collection_'.key.'_'.i.''
-				endif
-			endfor
-			for [k, v] in items(value)
-				execute 'let g:collection_'.key.'_'.k.'="'.v.'"'
-			endfor
-		endfor
+		let config_file = FindFile(a:file)
+		if config_file == '' | return | endif
+		execute('source '.config_file)
 	catch error
 		echo error
 	endtry

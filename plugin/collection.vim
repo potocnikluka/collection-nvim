@@ -18,19 +18,19 @@ endif
 if !exists('g:collection_format_save')
 	let g:collection_format_save=1
 endif
+if !exists('g:collection_additional_config')
+	let g:collection_additional_config=1
+endif
+if !exists('g:collection_config_file')
+	let g:collection_config_file='.config.vim'
+endif
 
 let g:configPath = stdpath('config')
 let g:termwin = 0
 let g:termbuf = 0
 let g:progwin = 0
 let g:progbuf = 0
-call collection#filetypes_settings()
-let g:snipInfo = {'buf': 0, 'win': 0, 'border_buf': 0, 'border_win': 0}
-augroup Snippets
-	autocmd BufEnter * if exists('g:snipWin') && exists('g:snipBordBuf') &&
-				\ bufnr("") == g:snipBordBuf |
-				\ if !win_gotoid(g:snipWin) |
-				\ silent! execute("bwipeout! " . g:snipBordBuf) |
-				\ else | wincmd p | wincmd w | endif | endif
-augroup END
+if g:collection_additional_config
+	call collection#filetypes_settings(g:collection_config_file)
+endif
 let g:loaded_collection = 1

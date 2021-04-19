@@ -29,5 +29,8 @@ end
 function M.snippetSelect()
 	snippets.onSelect()
 end
+function M.closeSnipWin()
+	snippets.closeSnipWin()
+end
 
 return M

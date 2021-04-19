@@ -29,6 +29,12 @@ local function onPopupCreation()
 	vim.api.nvim_buf_set_keymap(
 	vim.g.snipBuf, "", "<CR>",
 	":lua require'collection'.snippetSelect()<CR>", {silent=true})
+	vim.api.nvim_buf_set_keymap(
+	vim.g.snipBuf, "", "<Esc>",
+	":lua require'collection'.closeSnipWin()<CR>", {silent=true})
+	vim.api.nvim_buf_set_keymap(
+	vim.g.snipBordBuf, "", "<Esc>",
+	":lua require'collection'.closeSnipWin()<CR>", {silent=true})
 end
 
 local function showSnippets()
@@ -45,6 +51,15 @@ local function showSnippets()
 	vim.bo.readonly=true
 end
 
+function M.closeSnipWin()
+	if vim.fn.exists('g:snipBuf') == 1 then
+		vim.fn.execute("silent! bwipeout! "..vim.g.snipBuf)
+	end
+	if vim.fn.exists('g:snipBordBuf') == 1 then
+		vim.fn.execute("silent! bwipeout! "..vim.g.snipBordBuf)
+	end
+end
+
 function M.pasteSnippet(snippet)
 	vim.bo.readonly=false
 	local content = snips[snippet]
@@ -53,12 +68,7 @@ function M.pasteSnippet(snippet)
 	if content[2] == 'Move cursor:' or content[2] == 'Move cursor: ' then
 		move = false
 	end
-	if vim.fn.exists('g:snipBuf') == 1 then
-		vim.fn.execute("silent! bwipeout! "..vim.g.snipBuf)
-	end
-	if vim.fn.exists('g:snipBordBuf') == 1 then
-		vim.fn.execute("silent! bwipeout! "..vim.g.snipBordBuf)
-	end
+	M.closeSnipWin()
 	if not vim.bo.modifiable then
 		print("Could not paste")
 		return
@@ -71,7 +81,7 @@ function M.pasteSnippet(snippet)
 			i = i + 1
 		end
 	end
-	vim.fn.nvim_put(pasteContent, 'c', true, false)
+	vim.api.nvim_put(pasteContent, 'c', true, false)
 	if move then
 		local x = 'Move cursor:'
 		if string.find(snips[snippet][2], 'Move cursor: ') ~= nil then
@@ -118,7 +128,7 @@ local function addSnippet(name)
 		vim.bo.filetype=ft
 	end
 	local text = {'Name: '..name, 'Key binding:', 'Move cursor:', 'Code:', ''}
-	vim.fn.nvim_put(text, 'l', true, true)
+	vim.api.nvim_put(text, 'l', true, true)
 end
 
 local function saveSnippet(args)
@@ -143,7 +153,7 @@ local function saveSnippet(args)
 	if not string.find(vim.fn.getline(2), 'Name: ') then
 		name = vim.split(vim.fn.getline(2), 'Name:')[2]
 	end
-	if vim.fn.filereadable(vim.fn.stdpath('config')..'/snippets/'..name) and
+	if vim.fn.filereadable(vim.fn.stdpath('config')..'/snippets/'..name) == 1 and
 		args == 'save' then
 		print('File already exists, add ! to override!')
 		return
@@ -151,7 +161,8 @@ local function saveSnippet(args)
 
 	vim.bo.readonly=false
 	vim.cmd[[normal gg2dd]]
-	vim.fn.execute("wq! "..vim.fn.stdpath('config')..'/snippets/'..name)
+	vim.fn.execute("w! "..vim.fn.stdpath('config')..'/snippets/'..name)
+	M.closeSnipWin()
 end
 
 function M.onSelect()
@@ -204,8 +215,7 @@ function M.snippets(args)
 	if vim.fn.exists(vim.g.snipWin) == 1 and
 		vim.fn.win_gotoid(vim.g.snipWin) == 1 then
 		if args ~= 'save' and args ~= 'save!' and args ~= 'load' then
-			vim.fn.execute("silent! bwipeout "..vim.g.snipBuf.."")
-			vim.fn.execute("silent! bwipeout "..vim.g.snipBordBuf.."")
+			M.closeSnipWin()
 			wipe = true
 		end
 	end
