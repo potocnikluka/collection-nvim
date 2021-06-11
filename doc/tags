@@ -16,9 +16,12 @@ collection-snippets	collection-nvim.txt	/*collection-snippets*
 collection-terminal	collection-nvim.txt	/*collection-terminal*
 g:collection_additional_config	collection-nvim.txt	/*g:collection_additional_config*
 g:collection_config_file	collection-nvim.txt	/*g:collection_config_file*
+g:collection_errorlist_save	collection-nvim.txt	/*g:collection_errorlist_save*
 g:collection_errorlist_size	collection-nvim.txt	/*g:collection_errorlist_size*
 g:collection_errorlist_type	collection-nvim.txt	/*g:collection_errorlist_type*
 g:collection_format_ignore	collection-nvim.txt	/*g:collection_format_ignore*
 g:collection_format_save	collection-nvim.txt	/*g:collection_format_save*
+g:collection_load_snippets	collection-nvim.txt	/*g:collection_load_snippets*
+g:collection_run_ignore	collection-nvim.txt	/*g:collection_run_ignore*
 g:collection_terminal_size	collection-nvim.txt	/*g:collection_terminal_size*
 g:collection_terminal_type	collection-nvim.txt	/*g:collection_terminal_type*

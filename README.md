@@ -36,21 +36,31 @@ let g:collection_c_compiler='gcc %:p -o %:p:r -std=c99 -Wall -pedantic'
 let g:collection_c_execute='%:p:r'
 "etc..."
 
-"command for managing snippets
-command! -nargs=* Snippets lua require('collection').snippets(<q-args>)
-"toggle snippets list with <leader> q
-nnoremap <leader>q :Snippets<CR>
+"------------------------------------------------------------------ RUN PROGRAM
+" Run program with :R, autocomplete filenames for arguments
+command! -complete=file -nargs=* R call Run_program(<q-args>)
+" toggle errorlist with leader + e
+map <silent><leader>e <cmd>call Toggle_errorlist()<CR>
 
-"Toggle terminal
-nnoremap <silent><F4> :lua require('collection').toggleTerminal()<CR>
-tnoremap <silent><F4> <c-\><c-n>:lua require('collection').toggleTerminal()<CR>
+"--------------------------------------------------------------------- TERMINAL
+" toggle terminal with F4
+nnoremap <silent><F4> <cmd>call Term_toggle()<CR>
+tnoremap <silent><F4> <C-\><C-n> <cmd>call Term_toggle()<CR>
+" leave terminal insert mode with escape
+tnoremap <Esc> <C-\><C-n>
 
-"Format with <leader>f
-nnoremap <leader>f :lua require('collection').format()<CR>
+"----------------------------------------------------------------------- FORMAT
+" format the file with leader f
+nnoremap <silent><leader>f <cmd>call Format()<CR>
 
-"Toggle errorlist with shift-e
-nnoremap <S-e> :lua require('collection').toggleErrorlist()<CR>
+"--------------------------------------------------------------------- SNIPPETS
+"Open snippets window with leader + q, load snippets with leader + l
+"Create new snippet with :Sn(ippets) name.filetype
+command! -nargs=* Snippets call Snippets(<q-args>)
+nnoremap <leader>q <cmd>Snippets<CR>
+nnoremap <leader>l <cmd>Snippets load<CR>
 
 "Auto load snippets on enter
-"autocmd VimEnter * lua require('collection').snippets('load')
+let g:collection_load_snippets=1
 ```
+** same settings can be added to  `.config.vim`

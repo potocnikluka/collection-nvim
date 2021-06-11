@@ -22,7 +22,7 @@ FEATURES                                                 *collection-features*
     0. Snippet managing ................ |collection-snippets|
     1. Asynchronous program running .... |collection-run-program|
     2. Filetype specific settings ...... |collection-filetypes|
-    3. .config.vim ....................... |collection-config-file|
+    3. .config.vim ..................... |collection-config-file|
     4. Code formatting ................. |collection-formatting|
     5. Toggling Terminal ............... |collection-terminal|
 
@@ -43,6 +43,19 @@ g:collection_errorlist_size                      *g:collection_errorlist_size*
 	Size can be set between 1 and 200.
 
         default value: 50
+
+g:collection_errorlist_save                      *g:collection_errorlist_save*
+
+	Changing this option to 0 will disable saving the file when running
+	the program.
+	    
+	default value: 1
+
+g:collection_run_ignore                              *g:collection_run_ignore*
+
+	List of comma separated filetypes that don't allow running.
+
+	default value: "text,netrw,markdown"
 
 g:collection_format_ignore                        *g:collection_format_ignore*
 
@@ -72,6 +85,14 @@ g:collection_terminal_size                        *g:collection_terminal_size*
 	Size can be set between 1 and 200.
 
         default value: 50
+
+g:collection_load_snippets                        *g:collection_load_snippets*
+
+	When this option is set to 1, snippets will be loaded automatically
+	when starting vim. If snippets are not loaded, they cannot be pasted
+	with a keybinding.
+
+	default value: 0
 
 g:collection_additional_config                *g:collection_additional_config*
 
@@ -150,7 +171,7 @@ Example:
 	Normally adding '%' as a path will suffice.
 
 ==============================================================================
-ADDING A JSON FILE                                    *collection-config-file*
+ADDING A PROJECT CONFIG FILE                          *collection-config-file*
 	
 	If you want to use different comping or formating in a project, you
 	can add a |.config.vim| file. 
@@ -162,14 +183,15 @@ ADDING A JSON FILE                                    *collection-config-file*
 	unlet g:collection_typescript_execute
 
 
+
 ==============================================================================
 SNIPPETS                                                 *collection-snippets*
     
 	List all availible snippets:
-	`:lua require('collection').snippets('')`
+	`:call Snippets('')`
 
 	Create a new snippet:
-	`:lua require('collection').snippets({snippet-name})`
+	`:call ``Snippets({snippet-name})`
 
 	When creating a snippet, you need to provide a name and key binding.
 	Optionally you can add where to move the cursor after pasting the
@@ -187,20 +209,19 @@ SNIPPETS                                                 *collection-snippets*
 	Snippets can be either pasted directly from the list, or with a
 	remaping of the keys you specified when creating them. To enable
 	the mappings, use:
-	`:lua require('collection').snippets('load')` .
-	You can use an autocomand to load them on entering vim.
->
-	autocmd VimEnter * lua require('collection').snippets('load')
+	`:call Snippets('load')` .
+
+	See |g:collection_load_snippets|
 <
 	Recommended remappings:	
 
-	`command! -nargs=* Sn lua require('collection').snippets(<q-args>)`
+	`command! -nargs=* Sn call Snippets(<q-args>)`
 
 ==============================================================================
 RUNNING PROGRAM                                       *collection-run-program*
 
 	Run the program with:
-	`:lua require('collection').runProgram({arguments})`
+	`:call Run_program({arguments})`
 
 	For each filetype you can set an interpreter, a compiler and an
 	execute. You cannot have both a compiler and an interpreter.
@@ -211,23 +232,33 @@ RUNNING PROGRAM                                       *collection-run-program*
 	'-' will be used when compiling, others when executing.
 
 	Program output can be toggled with:
-	`:lua require('collection').toggleErrorlist()`
+	`:call Toggle_errorlist()`
 	See |collection-options|.
 
 	All compilers and interpreters need to be installed on your computer.
 	See |collection-filetypes| and |collection-config-file| for more on 
 	configuring filetype-specific and project-specific settings.
 
+	Additional arguments for compiling and running can be added to the
+	first two lines of the file:
+>
+	// compile -> ../file1 -lm
+	// execute -> < in.txt
+<
+	`//` can be replaced with any type of comment
+
 	Recommended remappings:
 
-	`command! -nargs=* R lua require('collection').runProgram(<q-args>)`
-	`map <C-e> <cmd>lua require('collection').toggleErrorlist()<CR>`
+>
+	command! -complete=file -nargs=* R call Run_program(<q-args>)
+	map <silent><leader>e <cmd>call Toggle_errorlist()<CR>
+<
 
 ==============================================================================
 CODE FORMATING                                         *collection-formatting*
 
 	Format the code with:
-	`:lua require('collection').format()`
+	`:call Format()`
 
 	You can set up different formaters for different filetypes, but they
 	need to be manually installed on the computer. If formater is not
@@ -239,14 +270,14 @@ CODE FORMATING                                         *collection-formatting*
 	You can map the command to a more conventien key binding. As an
 	example:
 >
-	nnoremap <leader>f :lua require('collection').format()<CR>
+	nnoremap <silent><leader>f <cmd>call Format()<CR>
 <
 
 ==============================================================================
 TOGGLING TERMINAL                                        *collection-terminal*
 
 	Toggle the terminal with:
-	`:lua require('collection').toggleTerminal()`
+	`:call Term_toggle()`
 
 	Terminal keeps the same 
 	instance when toggled off, the process is not killed. See
@@ -254,8 +285,8 @@ TOGGLING TERMINAL                                        *collection-terminal*
 
 	Mapping is recomended:
 >
-	nnoremap <F4> :lua require('collection').toggleTerminal<CR>
-	tnoremap <F4> <C-\><c-n>:lua require('collection').toggleTerminal<CR>
+	nnoremap <silent><F4> <cmd>call Term_toggle()<CR>
+	tnoremap <silent><F4> <C-\><C-n> <cmd>call Term_toggle()<CR>
 >
 
 ==============================================================================
