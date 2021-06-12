@@ -50,11 +50,4 @@ let g:config_path = stdpath('config')
 if g:collection_additional_config
 	call collection#get_settings(g:collection_config_file)
 endif
-"------------------------------- load snippets to be availible with keybindings
-let g:snippets_loaded = 1
-if g:collection_load_snippets
-	call Snippets('load')
-	let g:snippets_loaded = 1
-endif
-
 let g:loaded_collection = 1

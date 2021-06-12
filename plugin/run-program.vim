@@ -36,7 +36,7 @@ function! Run_program(args)
 		execute("let compiler = g:collection_" . &filetype . "_compiler")
 		if !Check_if_executable(compiler) | return | endif
 	endif
-	if exists('g:' . &filetype . "_execute")
+	if exists('g:collection_' . &filetype . "_execute")
 		execute("let execute = g:collection_" . &filetype . "_execute")
 		if !Check_if_executable(execute) | return | endif
 	endif

@@ -1,5 +1,6 @@
-"=============================================================================
-"------------------------------------------------------------------------------ SNIPPETS
+"==============================================================================
+"------------------------------------------------------------------------------ 
+"                                                                      SNIPPETS
 "==============================================================================
 " Show all snippets in a popup, create new snippets,...
 " _____________________________________________________________________________
@@ -12,6 +13,7 @@ let g:snip_info = {
 			\'border_buf': 0,
 			\}
 let g:snips = {}
+let g:snippets_loaded = 0
 
 function! Snippets(args)
 	let wipe = 0
@@ -27,6 +29,7 @@ function! Snippets(args)
 	elseif a:args == 'load'
 		if g:snippets_loaded | return | endif
 		call collection#load_snippets()
+		let g:snippets_loaded = 1
 	elseif a:args == 'save' || a:args == 'save!'
 		call Save_snippet(a:args)
 	else
@@ -275,3 +278,8 @@ function! Get_filetype(fl)
 	endif
 	return a:fl
 endfunction
+"------------------------------- load snippets to be availible with keybindings
+if g:collection_load_snippets
+	call Snippets('load')
+endif
+

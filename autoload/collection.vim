@@ -55,4 +55,3 @@ function! collection#load_snippets()
 		endif
 	endfor
 endfunction
-

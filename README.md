@@ -1,7 +1,7 @@
 # Collection-nvim
 
-A collection of configurations to implement some of neovim's 
-useful features.
+A simple plugin, focusing mainly on utilising some of Neovim's best features, such as 
+asynchronous job control.
 
 ## Prerequisites
 * neovim v0.5
@@ -53,14 +53,19 @@ tnoremap <Esc> <C-\><C-n>
 " format the file with leader f
 nnoremap <silent><leader>f <cmd>call Format()<CR>
 
-"--------------------------------------------------------------------- SNIPPETS
+""--------------------------------------------------------------------- SNIPPETS
 "Open snippets window with leader + q, load snippets with leader + l
 "Create new snippet with :Sn(ippets) name.filetype
 command! -nargs=* Snippets call Snippets(<q-args>)
-nnoremap <leader>q <cmd>Snippets<CR>
-nnoremap <leader>l <cmd>Snippets load<CR>
+nnoremap <leader>q <cmd>call Snippets('')<CR>
+nnoremap <leader>l <cmd>call Snippets('load')<CR>
 
 "Auto load snippets on enter
 let g:collection_load_snippets=1
+
+"interpreters, compilers, formaters,... need to be installed on your computer
+"interpreter, compiler, formater,... format should start with it's name
+"and then path and additional arguments, where path should be given unexpanded
+"see `:h expand`
 ```
 ** same settings can be added to  `.config.vim`
